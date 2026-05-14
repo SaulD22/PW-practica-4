@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Project Proposal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: #2a2a3a;
+      --accent: #00ffcc;
+      --accent2: #7c3aed;
+      --text: #e8e8f0;
+      --muted: #f1f1f1;
+      --error: #ff4d6d;
+      --success: #00ffcc;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+    }
+
+    /* Grid de fondo */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,204,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,204,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 2.5rem;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0,255,204,0.08);
+      border: 1px solid rgba(0,255,204,0.2);
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.9rem;
+      border-radius: 2px;
+      margin-bottom: 1.2rem;
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: blink 1.5s infinite;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      margin-top: 0.7rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+
+    /* Card del formulario */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2.5rem;
+      position: relative;
+      animation: fadeUp 0.7s ease 0.1s both;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      border-radius: 4px 4px 0 0;
+    }
+
+    /* Grupos de campo */
+    .fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    @media (max-width: 500px) {
+      .fields-row { grid-template-columns: 1fr; }
+      .card { padding: 1.5rem; }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.4rem;
+    }
+
+    label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    label span.req {
+      color: var(--accent);
+      margin-left: 2px;
+    }
+
+    input, textarea {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      padding: 0.75rem 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      outline: none;
+      width: 100%;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #3a3a50;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      background: rgba(0,255,204,0.03);
+      box-shadow: 0 0 0 3px rgba(0,255,204,0.07);
+    }
+
+    input.error, textarea.error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px rgba(255,77,109,0.07);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 160px;
+      line-height: 1.6;
+    }
+
+    /* Contador de palabras */
+    .word-counter {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.4rem;
+    }
+
+    .word-count-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    .word-count-text.ok { color: var(--accent); }
+    .word-count-text.bad { color: var(--error); }
+
+    .word-bar {
+      flex: 1;
+      margin-left: 1rem;
+      height: 3px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .word-bar-fill {
+      height: 100%;
+      background: var(--accent2);
+      border-radius: 99px;
+      transition: width 0.3s ease, background 0.3s;
+      width: 0%;
+    }
+
+    .word-bar-fill.ok { background: var(--accent); }
+
+    /* Mensaje de error inline */
+    .err-msg {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--error);
+      min-height: 1em;
+    }
+
+    /* Botón */
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 3px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+      margin-top: 0.5rem;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,255,204,0.25);
+    }
+
+    .btn:active:not(:disabled) { transform: translateY(0); }
+
+    .btn:disabled {
+      background: #2a2a3a;
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    .btn .spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    .btn.loading .btn-text { display: none; }
+    .btn.loading .spinner { display: block; }
+
+    /* Toast de respuesta */
+    .toast {
+      display: none;
+      margin-top: 1.5rem;
+      padding: 1.2rem 1.5rem;
+      border-radius: 3px;
+      border: 1px solid;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .toast.success {
+      display: block;
+      background: rgba(0,255,204,0.05);
+      border-color: rgba(0,255,204,0.25);
+      color: var(--accent);
+    }
+
+    .toast.error {
+      display: block;
+      background: rgba(255,77,109,0.05);
+      border-color: rgba(255,77,109,0.25);
+      color: var(--error);
+    }
+
+    .toast-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-bottom: 0.4rem;
+    }
+
+    .toast-detail {
+      margin-top: 0.6rem;
+      padding-top: 0.6rem;
+      border-top: 1px solid rgba(0,255,204,0.15);
+      color: var(--text);
+      font-size: 0.75rem;
+    }
+
+    /* Animaciones */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Propuesta de<br/><span>Proyecto con IA</span></h1>
+    <p class="subtitle">Completa el formulario para enviar tu propuesta.<br/>Mínimo 10 palabras en la descripción del proyecto.</p>
+  </div>
+
+  <div class="card">
+    <form id="proposalForm" novalidate>
+
+      <div class="fields-row">
+        <div class="field">
+          <label for="nombre">Nombre<span class="req">*</span></label>
+          <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" autocomplete="given-name"/>
+          <span class="err-msg" id="err-nombre"></span>
+        </div>
+        <div class="field">
+          <label for="apellidos">Apellidos<span class="req">*</span></label>
+          <input type="text" id="apellidos" name="apellidos" placeholder="Tus apellidos" autocomplete="family-name"/>
+          <span class="err-msg" id="err-apellidos"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="correo">Correo electrónico<span class="req">*</span></label>
+        <input type="email" id="correo" name="correo" placeholder="tu@correo.com" autocomplete="email"/>
+        <span class="err-msg" id="err-correo"></span>
+      </div>
+
+      <div class="field">
+        <label for="propuesta">Propuesta de proyecto IA<span class="req">*</span></label>
+        <textarea id="propuesta" name="propuesta" placeholder="Describe tu idea de proyecto de IA. Sé específico sobre el problema que resuelve."></textarea>
+        <div class="word-counter">
+          <span class="word-count-text" id="wordCount">0 palabras</span>
+          <div class="word-bar"><div class="word-bar-fill" id="wordBarFill"></div></div>
+        </div>
+        <span class="err-msg" id="err-propuesta"></span>
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">
+        <span class="btn-text">Enviar propuesta →</span>
+        <div class="spinner"></div>
+      </button>
+
+    </form>
+
+    <div class="toast" id="toast">
+      <div class="toast-label" id="toastLabel">Estado</div>
+      <div id="toastMessage"></div>
+      <div class="toast-detail" id="toastDetail" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Contador de palabras en tiempo real ---
+  const propuestaEl = document.getElementById('propuesta');
+  const wordCountEl = document.getElementById('wordCount');
+  const wordBarFill  = document.getElementById('wordBarFill');
+  const MIN_WORDS    = 10;
+
+  function countWords(text) {
+    return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+  }
+
+  propuestaEl.addEventListener('input', () => {
+    const words = countWords(propuestaEl.value);
+    wordCountEl.textContent = `${words} palabra${words !== 1 ? 's' : ''}`;
+
+    const pct = Math.min((words / MIN_WORDS) * 100, 100);
+    wordBarFill.style.width = pct + '%';
+
+    if (words >= MIN_WORDS) {
+      wordCountEl.classList.add('ok');
+      wordCountEl.classList.remove('bad');
+      wordBarFill.classList.add('ok');
+    } else {
+      wordCountEl.classList.remove('ok');
+      wordCountEl.classList.add('bad');
+      wordBarFill.classList.remove('ok');
+    }
+  });
+
+  // --- Validación del formulario ---
+  function validate() {
+    let valid = true;
+
+    const fields = [
+      { id: 'nombre',    errId: 'err-nombre',    msg: 'El nombre es requerido.' },
+      { id: 'apellidos', errId: 'err-apellidos',  msg: 'Los apellidos son requeridos.' },
+    ];
+
+    fields.forEach(f => {
+      const el  = document.getElementById(f.id);
+      const err = document.getElementById(f.errId);
+      if (!el.value.trim()) {
+        err.textContent = f.msg;
+        el.classList.add('error');
+        valid = false;
+      } else {
+        err.textContent = '';
+        el.classList.remove('error');
+      }
+    });
+
+    // Validar correo
+    const correoEl  = document.getElementById('correo');
+    const errCorreo = document.getElementById('err-correo');
+    const emailRx   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!correoEl.value.trim()) {
+      errCorreo.textContent = 'El correo es requerido.';
+      correoEl.classList.add('error');
+      valid = false;
+    } else if (!emailRx.test(correoEl.value.trim())) {
+      errCorreo.textContent = 'Ingresa un correo válido.';
+      correoEl.classList.add('error');
+      valid = false;
+    } else {
+      errCorreo.textContent = '';
+      correoEl.classList.remove('error');
+    }
+
+    // Validar propuesta (mínimo 10 palabras)
+    const propVal   = propuestaEl.value;
+    const errProp   = document.getElementById('err-propuesta');
+    const words     = countWords(propVal);
+    if (!propVal.trim()) {
+      errProp.textContent = 'La propuesta es requerida.';
+      propuestaEl.classList.add('error');
+      valid = false;
+    } else if (words < MIN_WORDS) {
+      errProp.textContent = `Mínimo ${MIN_WORDS} palabras (tienes ${words}).`;
+      propuestaEl.classList.add('error');
+      valid = false;
+    } else {
+      errProp.textContent = '';
+      propuestaEl.classList.remove('error');
+    }
+
+    return valid;
+  }
+
+  // --- Envío del formulario ---
+  document.getElementById('proposalForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const btn   = document.getElementById('submitBtn');
+    const toast = document.getElementById('toast');
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+    toast.className = 'toast';
+
+    const payload = {
+      nombre:    document.getElementById('nombre').value.trim(),
+      apellidos: document.getElementById('apellidos').value.trim(),
+      correo:    document.getElementById('correo').value.trim(),
+      propuesta: propuestaEl.value.trim(),
+    };
+
+    try {
+      const res  = await fetch('/api/submit', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      toast.classList.add(res.ok ? 'success' : 'error');
+      document.getElementById('toastLabel').textContent = res.ok ? '✓ Enviado' : '✗ Error';
+      document.getElementById('toastMessage').textContent = data.message || 'Respuesta recibida.';
+
+      if (res.ok && data.details) {
+        const detail = document.getElementById('toastDetail');
+        detail.style.display = 'block';
+        detail.textContent =
+          `Palabras detectadas: ${data.details.wordCount}· `;
+      }
+
+      if (res.ok) {
+        document.getElementById('proposalForm').reset();
+        wordCountEl.textContent = '0 palabras';
+        wordBarFill.style.width = '0%';
+        wordBarFill.classList.remove('ok');
+        wordCountEl.classList.remove('ok', 'bad');
+      }
+
+    } catch (err) {
+      toast.classList.add('error');
+      document.getElementById('toastLabel').textContent = '✗ Error de red';
+      document.getElementById('toastMessage').textContent =
+        'No se pudo conectar con el servidor. Verifica tu conexión.';
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
