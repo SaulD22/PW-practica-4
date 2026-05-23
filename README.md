@@ -17,3 +17,7 @@ Acceso no autorizado: Cualquier usuario puede inspeccionar el código fuente o e
 Rol del Backend como intermediario: El backend actúa como un proxy seguro. La API Key se almacena en variables de entorno del servidor, fuera del alcance del navegador. El frontend realiza peticiones al servidor propio, y este, tras autenticar al usuario, adjunta la clave de forma privada para comunicarse con el proveedor externo.
 
 ## `Herramientas:` ¿Qué es Google AI Studio y para qué sirve en el flujo de desarrollo?
+
+Google AI Studio es un entorno de desarrollo basado en la web diseñado para la creación rápida de prototipos con modelos de inteligencia artificial generativa.
+
+Función en el flujo de desarrollo: Permite a los desarrolladores experimentar con diferentes modelos (como la familia Gemini), ajustar parámetros de configuración (temperatura, límites de seguridad) y diseñar prompts de manera visual. Su utilidad principal es facilitar la transición del experimento al código, permitiendo exportar las configuraciones directamente a diversos lenguajes de programación para su integración en aplicaciones finales.
